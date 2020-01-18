@@ -41,7 +41,7 @@ app.get("/", function(req, res){
 });
 
 // SECRET ROUTE
-app.get("/secret", function(req, res){
+app.get("/secret",isLoggIn, function(req, res){
     res.render("secret");
 });
 
@@ -75,6 +75,19 @@ app.post("/login", passport.authenticate('local' , {
     
 });
 
+// LOGOUT
+app.get("/logout", function(req,res) {
+    req.logout();
+    res.redirect("/");
+});
+
+function isLoggIn(req, res, next) {
+    if(req.isAuthenticated()){
+        return next();
+    } else {
+        res.redirect("/");
+    }
+}
 app.listen(process.env.PORT || 3000, process.env.IP, function() {
     console.log('The Server has started....');
 });
