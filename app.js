@@ -13,10 +13,26 @@ mongoose.connect('mongodb://localhost/auth_demo_app', {
     useUnifiedTopology: true
 });
 
+//SESION ENCRIPT
+app.use(require("express-session")({
+    secret: "Your deed is where your belong",
+    resave: false,
+    saveUninitialized:false
+}));
+
 //FOR POST RNCODE
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(passport.initialize());
+app.use(passport.session());
 
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+//==================
+// ROUTES
+//==================
 
 // HOME ROUTE
 app.get("/", function(req, res){
@@ -26,6 +42,24 @@ app.get("/", function(req, res){
 // SECRET ROUTE
 app.get("/secret", function(req, res){
     res.render("secret");
+});
+
+// REGISTER
+app.get("/register", function(req,res){
+    res.render("register");
+})
+// HANDLING USER SIGNUP FORM
+app.post("/register", function(req,res){
+    User.register(new User({username: req.body.username}), req.body.password, function(err, user){
+        if(err){
+            console.log(err);
+            return res.render("register");
+        } else {
+            passport.authenticate("local")(req, res, function(){
+                res.redirect("/secret");
+            });
+        }
+    });
 });
 
 app.listen(process.env.PORT || 3000, process.env.IP, function() {
